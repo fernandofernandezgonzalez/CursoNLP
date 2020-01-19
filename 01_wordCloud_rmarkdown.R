@@ -21,7 +21,8 @@ masFrecuentesPorDoc<-findMostFreqTerms(dtm) # Los 10 mas frecuentes para cada do
 masFrecuentesTotales<-findFreqTerms(dtm) # Obtener terminos mas frecuentes en total
 
 
-# Probamos a hacer la núbe de palabras de unos pocos articulos (La matriz entera es demasiado grande)
+# Probamos a hacer la núbe de palabras de un documento 
+# La matriz entera es demasiado grande, para explorar todos los documentos utilizaremos otras tecnicas
 dtm <- TermDocumentMatrix(docs[2])
 m <- as.matrix(dtm)
 v <- sort(rowSums(m),decreasing=TRUE)
@@ -34,9 +35,9 @@ wordcloud(words = d$word, freq = d$freq, min.freq = 1,
           max.words=200, random.order=FALSE, rot.per=0.35, 
           colors=brewer.pal(8, "Dark2"))
 
+
+
 # Podemos ver que si no limpiamos adecuadamente el texto no obtendremos los resultados deseados
-
-
 # Reemplazar caracteres raros por espacios
 toSpace <- content_transformer(function (x , pattern ) gsub(pattern, " ", x))
 docs <- tm_map(docs, toSpace, "/")
@@ -45,10 +46,7 @@ docs <- tm_map(docs, toSpace, "\\|")
 
 
 
-
-
-
-## Limpieza
+# Limpieza
 # Convertir a minuscula (Ojo, no siempre bueno, para NER es mejor no hacerlo)
 docs <- tm_map(docs, content_transformer(tolower))
 # Eliminar numeros
@@ -65,7 +63,7 @@ docs <- tm_map(docs, stripWhitespace)
 # Text stemming
 # docs <- tm_map(docs, stemDocument)
 
-## Intentamos de nuevo hacer la nube de palabras con unos pocos documentos
+# Intentamos de nuevo hacer la nube de palabras con unos pocos documentos
 dtm <- TermDocumentMatrix(docs[2])
 m <- as.matrix(dtm)
 v <- sort(rowSums(m),decreasing=TRUE)
@@ -77,25 +75,3 @@ set.seed(1234)
 wordcloud(words = d$word, freq = d$freq, min.freq = 1,
           max.words=200, random.order=FALSE, rot.per=0.35, 
           colors=brewer.pal(8, "Dark2"))
-
-
-
-## Pdemos explorar tambien asociaciones de los terminso mas frecuentes con otros terminos:
-dtm <- TermDocumentMatrix(docs)
-findFreqTerms(dtm, lowfreq =100) # Palabras que salen en al menos 100 articulos
-# Veamos los terminos asocados a turismo
-findAssocs(dtm, terms = "turismo", corlimit = 0.3)
-findAssocs(dtm, terms = "turismo", corlimit = 0.2)
-
-
-# Para un corpus con un diccionario pequenio, podemos obtener las frecuencias de terminos y graficarlas de la siguiente manera
-dtm <- TermDocumentMatrix(docs[1:10])
-m <- as.matrix(dtm)
-v <- sort(rowSums(m),decreasing=TRUE)
-d <- data.frame(word = names(v),freq=v)
-head(d, 10)
-
-barplot(d[1:10,]$freq, las = 2, names.arg = d[1:10,]$word,
-        col ="lightblue", main ="Palabras más frecuentes",
-        ylab = "Frecuencia de palabra")
-# Esta visualizacion nos sera util mas adelante para 
