@@ -71,10 +71,17 @@ plot(lsi$projection$s)
 # Otra tarea del NLP --> Identificación de idioma, en este caso no funciona puesto que en los documentos se mezclan idiomas
 # En este caso podemos eliminar los articulos que contengan algunas palabras que aparecen en los factores 
 # "window.end" y "també" para el valenciano y catalán, por ejemplo.
-noticias2<-noticias[!(noticias%like%"%window.end%" | noticias%like%"%també%")]
+noticias2<-noticias[!(noticias%like%"%window%" 
+                      | noticias%like%"%cookies%"
+                      | noticias%like%"%recibidastarjetas%"
+                      | noticias%like%"%contraseña%"
+                      | noticias%like%"%també%")]
+
+noticias2<-rm_stopwords(noticias2,stopwords("spanish")) # Quitamos stopwords con qdap
+noticias2<-sapply(noticias2,function(x)paste(x,collapse=" ")) # Volvemos a pegar todos los tokesn para poder usar gensim
 
 # Podemos repetir el proceso
-docs <- prepare_documents(noticias2)  
+docs <- prepare_documents(noticias2)   #Podemosutilizar el corpus creado con el paquete tm que tiene el tratamiento que necesitamos
 dictionary <- corpora_dictionary(docs)
 corpus_bow <- doc2bow(dictionary, docs)
 (corpus_mm <- serialize_mmcorpus(corpus_bow, auto_delete = FALSE))
@@ -82,7 +89,7 @@ tfidf <- model_tfidf(corpus_mm)
 corpus_transformed <- wrap(tfidf, corpus_bow)
 
 # Calculamos el modelo tf_idf
-lsi <- model_lsi(corpus_transformed, id2word = dictionary, num_topics = 100L) # Solo se calculan los 10 primeros autovectores
+lsi <- model_lsi(corpus_transformed, id2word = dictionary, num_topics = 15L) # Solo se calculan los 10 primeros autovectores
 lsi$print_topics()
 lsi$print_topics()[0]
 lsi$print_topics()[2]
@@ -103,7 +110,8 @@ similarity(corpus, ...)
 
 mm <- read_serialized_mmcorpus(corpus_mm)
 
-new_document <- "A human and computer interaction"
+# Busqueda
+new_document <- "Esta incidencia es, según fuentes del hospital, un virus informático que ha bloqueado los sistemas hasta el punto de cerrar el acceso a las historias clínicas de los pacientes y obligar a los profesionales a realizar los informes médicos en papel con un calco para poder recuperar esa información cuando se vuelva a la normalidad"
 preprocessed_new_document <- preprocess(new_document, min_freq = 0)
 vec_bow <- doc2bow(dictionary, preprocessed_new_document)
 vec_lsi <- wrap(lsi, vec_bow)
@@ -113,4 +121,5 @@ index <- similarity_matrix(wrapped_lsi)
 
 sims <- wrap(index, vec_lsi)
 
-get_similarity(sims)
+topResults<-head(get_similarity(sims))
+resultsText<-noticias2[topResults$doc+1]
