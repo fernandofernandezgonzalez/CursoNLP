@@ -122,4 +122,4 @@ index <- similarity_matrix(wrapped_lsi)
 sims <- wrap(index, vec_lsi)
 
 topResults<-head(get_similarity(sims))
-resultsText<-noticias2[topResults$doc+1]
+resultsText<-noticias2[topResults$doc]
