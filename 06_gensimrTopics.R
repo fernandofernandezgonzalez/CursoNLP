@@ -27,7 +27,7 @@ topics <- lda$print_topics() # get topics
 
 
 # Intentamos replicarlo con noticias de un dia
-# Cargar corpus pequenio artículosd de 1 semana
+# Cargar corpus pequenio artículosd de 1 Dia
 load("data/noticiasDiciembre2019Dia1.RData")
 
 noticias<-unlist(lapply(noticiasDiciembre2019Dia1,function(x)x$body))

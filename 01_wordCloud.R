@@ -1,11 +1,11 @@
 # Cargar librerías
 source("0_cargarLibrerias.R")
 
-# Cargar corpus pequenio artículosd de 1 semana
-load("data/noticiasDiciembre2019Semana1.RData")
+# Cargar corpus pequenio artículosd de 1 Dia
+load("data/noticiasDiciembre2019Dia1.RData")
 
 # Quedarnos solo con el texto
-noticias<-unlist(lapply(noticiasDiciembre2019Semana1,function(x)lapply(x,function(y)y$body)))
+noticias<-unlist(lapply(noticiasDiciembre2019Dia1,function(x)lapply(x,function(y)y$body)))
 
 # Definimos un corpus con el paquete tm
 docs <- Corpus(VectorSource(noticias))
