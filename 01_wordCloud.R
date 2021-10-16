@@ -1,11 +1,19 @@
 # Cargar librerías
-source("0_cargarLibrerias.R")
+# source("0_cargarLibrerias.R")
+library("tm")
+library("wordcloud")
 
-# Cargar corpus pequenio artículosd de 1 Dia
-load("data/noticiasDiciembre2019Dia1.RData")
+# Cargar corpus pequenio artículosd de 1 semana
+load("data/noticiasDiciembre2019Semana1.RData")
 
 # Quedarnos solo con el texto
-noticias<-unlist(lapply(noticiasDiciembre2019Dia1,function(x)lapply(x,function(y)y$body)))
+noticias<-unlist(lapply(noticiasDiciembre2019Semana1,function(x)lapply(x,function(y)y$body)))
+
+noticias <- noticias[1:1000]  # Nos quedamos solo con 1000 para el ejemplo (limites Rstudio cloud)
+
+# Borramos el dataset original para ahorrar memoria (limites RStudio cloud)
+rm(noticiasDiciembre2019Semana1)
+gc(full=TRUE)
 
 # Definimos un corpus con el paquete tm
 docs <- Corpus(VectorSource(noticias))
@@ -44,10 +52,6 @@ docs <- tm_map(docs, toSpace, "@")
 docs <- tm_map(docs, toSpace, "\\|")
 
 
-
-
-
-
 ## Limpieza
 # Convertir a minuscula (Ojo, no siempre bueno, para NER es mejor no hacerlo)
 docs <- tm_map(docs, content_transformer(tolower))
@@ -83,6 +87,7 @@ wordcloud(words = d$word, freq = d$freq, min.freq = 1,
 ## Pdemos explorar tambien asociaciones de los terminso mas frecuentes con otros terminos:
 dtm <- TermDocumentMatrix(docs)
 findFreqTerms(dtm, lowfreq =100) # Palabras que salen en al menos 100 articulos
+gc(full=TRUE)
 # Veamos los terminos asocados a turismo
 findAssocs(dtm, terms = "turismo", corlimit = 0.3)
 findAssocs(dtm, terms = "turismo", corlimit = 0.2)
@@ -98,4 +103,3 @@ head(d, 10)
 barplot(d[1:10,]$freq, las = 2, names.arg = d[1:10,]$word,
         col ="lightblue", main ="Palabras más frecuentes",
         ylab = "Frecuencia de palabra")
-# Esta visualizacion nos sera util mas adelante para 

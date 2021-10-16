@@ -1,8 +1,10 @@
 # Cargar librerías
-source("0_cargarLibrerias.R")
+#source("0_cargarLibrerias.R")
 
 library("gensimr")
-
+library("tm")
+library("qdap")
+library("DescTools")
 
 
 

@@ -7,6 +7,7 @@
 # install.packages("remotes")
 #require(devtools)
 #install_version("ISOcodes", version = "2019.04.22", repos = "http://cran.us.r-project.org")
+# install.packages("stringi")
 #remotes::install_github("news-r/gensimr",dependencies=TRUE)
 #gensimr::install_dependencies()
 #install.packages("textcat")

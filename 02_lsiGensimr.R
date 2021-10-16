@@ -1,12 +1,19 @@
 # Cargar librerías
-source("0_cargarLibrerias.R")
+#source("0_cargarLibrerias.R") # Falla tidytext en ubuntu 20.04, actualizar
+# remotes::install_github("news-r/gensimr",dependencies=TRUE)
+library("gensimr")
+library("tm")
+library("qdap")
+library("DescTools")
 
-# Cargar corpus pequenio artículosd de 1 Dia
-load("data/noticiasDiciembre2019Dia1.RData")
+
+# Cargar corpus pequenio artículosd de 1 semana
+load("data/noticias_2021.RData")
 
 # Quedarnos solo con el texto
-noticias<-unlist(lapply(noticiasDiciembre2019Dia1,function(x)lapply(x,function(y)y$body)))
+noticias<-noticias_2021$body
 
+rm(noticias_2021) # (limites rstudio cloud)
 # Definimos un corpus con el paquete tm
 #docs <- Corpus(VectorSource(noticias))
 
@@ -48,9 +55,10 @@ tfidf <- model_tfidf(corpus_mm)
 corpus_transformed <- wrap(tfidf, corpus_bow)
 
 # Calculamos el modelo tf_idf
-lsi <- model_lsi(corpus_transformed, id2word = dictionary, num_topics = 10L) # Solo se calculan los 10 primeros autovectores
+lsi <- model_lsi(corpus_transformed, id2word = dictionary, num_topics = 100L) # Solo se calculan los 10 primeros autovectores
 lsi$print_topics()
 lsi$print_topics()[0]
+lsi$print_topics()[1]
 lsi$print_topics()[2]
 lsi$print_topics()[3]
 lsi$print_topics()[4]
@@ -63,7 +71,7 @@ lsi$print_topics()[9]
 # Con la matriz S de la factorizacion SVD podemos explorar el número óptimo de factores
 plot(lsi$projection$s)
 
-# Segun este grafico aparentemente 4 factores son suficientes, pero esto se debe a que se nos han colado varias cosas en el corpus:
+# Segun este grafico aparentemente 20 factores son suficientes, pero esto se debe a que se nos han colado varias cosas en el corpus:
 # Documentos en otros idiomas
 # Documentos "basura" relacionados con la estructura de las páginas
 # Esto hace que el modelo se centre en separar idiomas y documentos de codigo del resto en lugar de lo que nos interesa
@@ -77,6 +85,31 @@ noticias2<-noticias[!(noticias%like%"%window%"
                       | noticias%like%"%contraseña%"
                       | noticias%like%"%també%")]
 
+
+docs <- Corpus(VectorSource(noticias2))
+
+# Reemplazar caracteres raros por espacios
+toSpace <- content_transformer(function (x , pattern ) gsub(pattern, " ", x))
+docs <- tm_map(docs, toSpace, "/")
+docs <- tm_map(docs, toSpace, "@")
+docs <- tm_map(docs, toSpace, "\\|")
+
+## Limpieza
+# Convertir a minuscula (Ojo, no siempre bueno, para NER es mejor no hacerlo)
+docs <- tm_map(docs, content_transformer(tolower))
+# Eliminar numeros
+docs <- tm_map(docs, removeNumbers)
+# Eliminar stopwords en castellano
+docs <- tm_map(docs, removeWords, stopwords("spanish")) 
+# Podemos sustitur el vector de stopwords por el que queramos
+# especificandolas como un vector de palabras
+docs <- tm_map(docs, removeWords, c("palabra1", "palabra2")) 
+# Quitar signos de puntuacion, (Ojo, no siempre bueno, para NER es mejor no hacerlo) 
+docs <- tm_map(docs, removePunctuation)
+# Eliminar espacios en blanco extra
+docs <- tm_map(docs, stripWhitespace)
+
+noticias2 <- unlist(docs)
 noticias2<-rm_stopwords(noticias2,stopwords("spanish")) # Quitamos stopwords con qdap
 noticias2<-sapply(noticias2,function(x)paste(x,collapse=" ")) # Volvemos a pegar todos los tokesn para poder usar gensim
 
@@ -88,10 +121,12 @@ corpus_bow <- doc2bow(dictionary, docs)
 tfidf <- model_tfidf(corpus_mm)
 corpus_transformed <- wrap(tfidf, corpus_bow)
 
+
 # Calculamos el modelo tf_idf
-lsi <- model_lsi(corpus_transformed, id2word = dictionary, num_topics = 15L) # Solo se calculan los 10 primeros autovectores
+lsi <- model_lsi(corpus_transformed, id2word = dictionary, num_topics = 20L) # Solo se calculan los 10 primeros autovectores
 lsi$print_topics()
 lsi$print_topics()[0]
+lsi$print_topics()[1]
 lsi$print_topics()[2]
 lsi$print_topics()[3]
 lsi$print_topics()[4]
@@ -106,12 +141,15 @@ plot(lsi$projection$s)
 
 # Con el modelo LSI podemos indexar los documentos para hacer busquedas sobre ellos con similarity
 # https://gensimr.news-r.org/articles/similarity.html
+
 similarity(corpus, ...)
 
 mm <- read_serialized_mmcorpus(corpus_mm)
 
 # Busqueda
-new_document <- "Esta incidencia es, según fuentes del hospital, un virus informático que ha bloqueado los sistemas hasta el punto de cerrar el acceso a las historias clínicas de los pacientes y obligar a los profesionales a realizar los informes médicos en papel con un calco para poder recuperar esa información cuando se vuelva a la normalidad"
+#new_document <- noticias2[1]
+#new_document <- "nuevo modelo híbrido de seat"
+new_document <- "covid 19 contagios"
 preprocessed_new_document <- preprocess(new_document, min_freq = 0)
 vec_bow <- doc2bow(dictionary, preprocessed_new_document)
 vec_lsi <- wrap(lsi, vec_bow)

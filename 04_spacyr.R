@@ -2,13 +2,14 @@
 # https://spacyr.quanteda.io/
 # https://cran.r-project.org/web/packages/spacyr/vignettes/using_spacyr.html
 library("spacyr")
-#spacy_install() # Crea un virtualenv con miniconda, como en el caso de gensimr
 
 # Por defecto solo viene instalado el idioma Ingles, añadimos español
 #spacy_download_langmodel("es")
 
 # Cargar el tokenizador, tagger, parsers, NER y word vectors de ES
-spacy_initialize(model = "es_core_news_sm")
+spacy_initialize(model = "es_core_news_sm",
+                 python_executable = "/cloud/project/spacy_virtualenv/bin/python3",
+                 virtualenv="/cloud/project/spacy_virtualenv")
 
 txt <- c(d1 = "Arranque fuerte del Gobierno. Tras varios meses de parálisis institucional, el Ejecutivo de coalición de PSOE y Unidas Podemos parece querer dejar claro que vienen con el ánimo de poner en marcha su programa y, tan solo 10 días después de configurar el Consejo de Ministros, han anunciado un acuerdo con patronal y sindicatos para subir el salario mínimo hasta los 950 euros para 2020.",
          d2 = "Fue en diciembre de 2018, cuando el presidente del Gobierno, Pedro Sánchez, aumentó el SMI en un 22% hasta los 900 euros, la mayor subida desde 1977 pero sin el acuerdo de la mesa de diálogo social.")

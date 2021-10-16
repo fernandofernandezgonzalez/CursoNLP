@@ -1,18 +1,21 @@
 # Cargar librerías
-source("0_cargarLibrerias.R")
+#source("0_cargarLibrerias.R")
+library(textcat)
 
-# Cargar corpus pequenio artículosd de 1 Dia
-load("data/noticiasDiciembre2019Dia1.RData")
+# Cargar corpus pequenio artículos de termática fija
+load("data/noticias_2021.RData")
 
 # Quedarnos solo con el texto
-noticias<-unlist(lapply(noticiasDiciembre2019Dia1,function(x)lapply(x,function(y)y$body)))
+noticias<-noticias_2021$body
 
-my.profiles <- TC_byte_profiles[names(TC_byte_profiles) %in% c("english", "spanish","catalan")]
+my.profiles <- TC_byte_profiles[names(TC_byte_profiles) %in% c("english", "spanish","catalan","galician")]
 my.profiles
 
 lenguajes<-textcat(noticias, p = my.profiles)  # Identificación de lenguaje basada en ngramas
 
 # Nos quedamos solo con los articulos en español
 noticiasSpanish<-noticias[lenguajes=="spanish"]
+noticiasEnglish<-noticias[lenguajes=="english"]
+noticiasCatalan<-noticias[lenguajes=="catalan"]
 
 # Y repetimos el proceso de lsi:

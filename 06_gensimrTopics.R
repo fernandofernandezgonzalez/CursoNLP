@@ -1,8 +1,11 @@
 # Cargar librerías
 source("0_cargarLibrerias.R")
 
-library("gensimr")
 
+library("gensimr")
+library("tm")
+library("qdap")
+library("DescTools")
 
 
 
@@ -27,10 +30,10 @@ topics <- lda$print_topics() # get topics
 
 
 # Intentamos replicarlo con noticias de un dia
-# Cargar corpus pequenio artículosd de 1 Dia
-load("data/noticiasDiciembre2019Dia1.RData")
+# Cargar corpus pequenio artículosd de 1 semana
+load("data/noticias_2021.RData")
 
-noticias<-unlist(lapply(noticiasDiciembre2019Dia1,function(x)x$body))
+noticias<-noticias_2021$body
 
 noticias2<-noticias[!(noticias%like%"%window%" 
                       | noticias%like%"%cookies%"
@@ -52,9 +55,9 @@ tfidf <- model_tfidf(corpus)
 tfidf_corpus <- wrap(tfidf, corpus)
 
 # latent similarity index
-lda <- model_lda(tfidf_corpus, id2word = dictionary, num_topics = 20L)
+lda <- model_lda(tfidf_corpus, id2word = dictionary, num_topics = 620L)
 topics <- lda$print_topics() # get topics
-for(i in 0:19){
+for(i in 0:5){
   print(topics[i])
 }
 
