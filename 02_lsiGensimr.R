@@ -7,6 +7,11 @@ library("qdap")
 library("DescTools")
 
 
+# Si al cargar gensim no funciona o da error en alguno de los pasos:
+# remotes::install_github("news-r/gensimr",dependencies=TRUE, force=TRUE)
+# Elegir opcion 2: Cran packages only
+#
+
 # Cargar corpus pequenio artículosd de 1 semana
 load("data/noticias_2021.RData")
 
